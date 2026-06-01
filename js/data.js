@@ -147,6 +147,16 @@ const TEMPLATES = [
     file: "Gmail_and_Email_Automation/LeadPilot Lite - AI Cold Email Writer.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/Gmail_and_Email_Automation/LeadPilot%20Lite%20-%20AI%20Cold%20Email%20Writer.json"
   },
+  {
+    id: "gmail-13",
+    title: "Scheduled Cold Email Campaign & Batch Sender",
+    description: "A robust batch cold email outreach workflow. Triggers daily at 9 AM, reads prospect contacts from Google Sheets, randomizes and filters pending leads, normalizes name formats, and sends batches of personalized HTML emails via Gmail every hour while automatically pausing outside of business hours (8 PM IST) and logging status to the sheet.",
+    category: "gmail",
+    department: "Marketing",
+    tags: ["Gmail", "Cold Email", "Outreach", "Google Sheets", "Batch Sender", "Campaign"],
+    file: "brands2be_email_automation.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/brands2be_email_automation.json"
+  },
 
   // ─── Telegram ───────────────────────────────────────────────
   {
@@ -781,6 +791,16 @@ const TEMPLATES = [
     file: "WhatsApp/WhatsApp Lead Capture & CRM Sync.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/WhatsApp/WhatsApp%20Lead%20Capture%20%26%20CRM%20Sync.json"
   },
+  {
+    id: "whatsapp-04",
+    title: "WhatsApp AI Lead Capture Chatbot (NIHT Institute)",
+    description: "An AI-powered conversational chatbot (\"Nisha\") for WhatsApp. Triggers on incoming WhatsApp messages, uses Gemini and Pinecone to answer course queries, maintains session memory, politely collects lead information (name, email, phone) step-by-step, saves leads to Airtable, and routes pricing queries.",
+    category: "whatsapp",
+    department: "Sales",
+    tags: ["WhatsApp", "AI Chatbot", "Gemini", "Pinecone", "Lead Capture", "Airtable"],
+    file: "whatsapp_chatbot.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/whatsapp_chatbot.json"
+  },
 
   // ─── Social Media ─────────────────────────────────────────────
   {
@@ -823,6 +843,26 @@ const TEMPLATES = [
     file: "Instagram_Twitter_Social_Media/LinkedIn AI Post Writer and Publisher.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/Instagram_Twitter_Social_Media/LinkedIn%20AI%20Post%20Writer%20and%20Publisher.json"
   },
+  {
+    id: "social-05",
+    title: "Meta Lead Intelligence & Daily Performance Report with Claude AI",
+    description: "An automated daily reporting workflow. Fetches campaign, adset, and ad-level performance metrics from Meta Graph API, calculates rolling performance baselines using Google Sheets, and uses Claude AI to analyze ads data and generate strategic recommendations, saving the results back to Google Sheets.",
+    category: "social",
+    department: "Marketing",
+    tags: ["Meta Ads", "Facebook Ads", "Claude AI", "Marketing Analytics", "Google Sheets", "Reporting"],
+    file: "Meta Lead Intelligence — Daily Report.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/Meta%20Lead%20Intelligence%20%E2%80%94%20Daily%20Report.json"
+  },
+  {
+    id: "social-06",
+    title: "Omnichannel Social Media Auto-Poster & Scheduler",
+    description: "An advanced multi-platform scheduling and auto-posting system. Triggers by reading scheduled posts from a database, routes content dynamically based on target platforms (Instagram, Facebook Page, LinkedIn, YouTube) and formats (Single Image, Carousel, Reels/Videos, Stories, Articles), downloads media, and auto-posts via official Graph APIs.",
+    category: "social",
+    department: "Marketing",
+    tags: ["Social Media", "Facebook API", "Instagram API", "LinkedIn API", "YouTube API", "Scheduling", "Auto-Poster"],
+    file: "social_media_preeti.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/social_media_preeti.json"
+  },
 
   // ─── Other Integrations & Use Cases ──────────────────────────
   {
@@ -864,6 +904,16 @@ const TEMPLATES = [
     tags: ["HTTP", "API", "Multi-app", "Connector"],
     file: "Other_Integrations_and_Use_Cases/Zapier-Style Multi-App Connector.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/Other_Integrations_and_Use_Cases/Zapier-Style%20Multi-App%20Connector.json"
+  },
+  {
+    id: "integrations-05",
+    title: "Google Ads Competitor Analysis & Ingestion Pipeline",
+    description: "An automated competitor analysis pipeline. Triggers when keywords and location are submitted, queries Google Search results across multiple pages via SearchAPI, extracts and deduplicates competitor domains (ranking by Ads, Local, and Organic), queries SerpAPI's Google Ads Transparency Center to determine how many ads each competitor is running, and logs results in Airtable.",
+    category: "integrations",
+    department: "Marketing",
+    tags: ["Google Ads", "Competitor Analysis", "Airtable", "SerpAPI", "SearchAPI", "Lead Gen"],
+    file: "googleads_competitor_analysis.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/googleads_competitor_analysis.json"
   },
 
   // ─── Forms & Surveys ──────────────────────────────────────────
@@ -949,6 +999,16 @@ const TEMPLATES = [
     file: "AI_Research_RAG_and_Data_Analysis/Sentiment Analysis Pipeline with AI.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/AI_Research_RAG_and_Data_Analysis/Sentiment%20Analysis%20Pipeline%20with%20AI.json"
   },
+  {
+    id: "rag-06",
+    title: "RAG-Powered AI Voice & Support Agent",
+    description: "An AI support agent (\"Riya\") built using Google Gemini and Pinecone. Takes incoming search queries via webhooks, retrieves context from a Pinecone vector index using Gemini embeddings, answers support questions based only on retrieved context, and returns the response dynamically.",
+    category: "rag",
+    department: "Support",
+    tags: ["RAG", "Gemini", "Pinecone", "Support Bot", "Webhook", "AI Agent"],
+    file: "voice agent.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/voice%20agent.json"
+  },
 
   // ─── Other ───────────────────────────────────────────────────
   {
@@ -980,5 +1040,25 @@ const TEMPLATES = [
     tags: ["HR", "Resume", "AI Screening", "Recruitment"],
     file: "HR_and_Recruitment/AI Resume Screener for HR Teams.json",
     rawUrl: "https://raw.githubusercontent.com/enescingoz/awesome-n8n-templates/main/HR_and_Recruitment/AI%20Resume%20Screener%20for%20HR%20Teams.json"
+  },
+  {
+    id: "other-04",
+    title: "Automated Resume Review System Using OpenAI & Google Sheets",
+    description: "Extracts applicant details from resume submissions via n8n forms, uploads resumes to Google Drive, extracts qualifications and info using OpenAI GPT, rates alignment against target profiles, and stores candidate evaluation scores in Google Sheets.",
+    category: "other",
+    department: "HR",
+    tags: ["HR", "Resume Review", "OpenAI", "Google Sheets", "Google Drive"],
+    file: "78-Automated_Resume_Review_System_Using_OpenAI___Google_Sheets.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/78-Automated_Resume_Review_System_Using_OpenAI___Google_Sheets.json"
+  },
+  {
+    id: "other-05",
+    title: "HR Job Application Screening & Evaluation with AI & Airtable",
+    description: "An end-to-end recruitment screening workflow. Triggers when an applicant submits a job application form, uploads their CV to Google Drive, logs contact info in Airtable, extracts text from the CV, and uses an AI Agent to score the candidate against the Job Description in Airtable, moving them to Decision Needed or No Hire stages accordingly.",
+    category: "other",
+    department: "HR",
+    tags: ["HR", "Recruitment", "AI Agent", "Airtable", "Google Drive", "CV Screening"],
+    file: "87-HR_Job_Posting_and_Evaluation_with_AI.json",
+    rawUrl: "https://raw.githubusercontent.com/akashrana0037/vyom-n8n-templates/master/87-HR_Job_Posting_and_Evaluation_with_AI.json"
   },
 ];
