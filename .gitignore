@@ -1,0 +1,17 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor folders
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Local server artifacts
+__pycache__/
+
+# Vercel local cache
+.vercel/

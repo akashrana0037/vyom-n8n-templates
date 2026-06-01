@@ -1,0 +1,1061 @@
+{
+  "name": "Meta Lead Intelligence — Daily Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "7cd80a79-c6eb-44ab-b77f-37802542390a",
+      "name": "Schedule: Daily 8AM IST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 2 — Set Date Variables (run once)\nconst now = new Date();\nconst IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;\n\nfunction toISTDate(date) {\n  const ist = new Date(date.getTime() + IST_OFFSET_MS);\n  return ist.toISOString().split(\"T\")[0];\n}\n\nconst yesterday           = toISTDate(new Date(now - 86400000));\nconst rolling_window_start = toISTDate(new Date(now - 4 * 86400000));\n\nreturn [{ json: { yesterday, rolling_window_start } }];"
+      },
+      "id": "ae0d7ee1-b81c-48cf-ba12-1e8871ccfa13",
+      "name": "Code: Set Dates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/act_10150282185654749/insights",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "YOUR_META_ACCESS_TOKEN_HERE"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "date_preset",
+              "value": "yesterday"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_name,campaign_id,adset_name,adset_id,spend,impressions,cpm,ctr,cpc,frequency,actions,cost_per_action_type"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f01cd52d-2715-417e-a266-aa09420f4d23",
+      "name": "HTTP: Campaign Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        720
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZyxCJw6zF7jJHX77",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/act_10150282185654749/insights",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "YOUR_META_ACCESS_TOKEN_HERE"
+            },
+            {
+              "name": "level",
+              "value": "adset"
+            },
+            {
+              "name": "date_preset",
+              "value": "yesterday"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_name,campaign_id,adset_name,adset_id,spend,impressions,cpm,ctr,cpc,frequency,actions,cost_per_action_type"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "19625c0e-fded-4325-9ef0-c2d3ebce221c",
+      "name": "HTTP: Adset Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        912
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "JxVWa1gfpXAIRcWL",
+          "name": "serp api google rank"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/act_10150282185654749/insights",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "YOUR_META_ACCESS_TOKEN_HERE"
+            },
+            {
+              "name": "level",
+              "value": "ad"
+            },
+            {
+              "name": "date_preset",
+              "value": "yesterday"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_name,campaign_id,adset_name,adset_id,spend,impressions,cpm,ctr,cpc,frequency,actions,cost_per_action_type"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6396d8b-0043-416e-bdd8-d80af26d22f5",
+      "name": "HTTP: Ad Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        1104
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZyxCJw6zF7jJHX77",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 6 — Tag Campaign Data\nconst rows = $input.first().json.data || [];\nif (!rows.length) throw new Error(\"META_EMPTY:campaign\");\nreturn rows.map(row => ({ json: { ...row, _level: \"Campaign\" } }));"
+      },
+      "id": "da4e44eb-f34b-41db-8f0b-d1f974a3562d",
+      "name": "Code: Tag Campaign",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 7 — Tag Adset Data\nconst rows = $input.first().json.data || [];\nreturn rows.map(row => ({ json: { ...row, _level: \"Adset\" } }));"
+      },
+      "id": "3248cc32-85a4-4076-9228-2ea22bec838d",
+      "name": "Code: Tag Adset",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 8 — Tag Ad Data\nconst rows = $input.first().json.data || [];\nreturn rows.map(row => ({ json: { ...row, _level: \"Ad\" } }));"
+      },
+      "id": "cf09aac6-e060-4dc0-9feb-7135548e5f5c",
+      "name": "Code: Tag Ad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        1104
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "0ff8e173-2a71-4960-aab8-e08800d4519c",
+      "name": "Merge: Combine All",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1264,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const d = item.json || {};\n\n  const toNumber = (v) => {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : 0;\n  };\n\n  // ---------- LEADS ----------\n  let leads = 0;\n\n  if (Array.isArray(d.actions)) {\n    const leadAction = d.actions.find(a =>\n      (a.action_type || \"\").toLowerCase() === \"lead\"\n    );\n    if (leadAction) {\n      leads = toNumber(leadAction.value);\n    }\n  }\n\n  // ---------- CPL ----------\n  let cpl = 0;\n\n  if (Array.isArray(d.cost_per_action_type)) {\n    const leadCost = d.cost_per_action_type.find(a =>\n      (a.action_type || \"\").toLowerCase() === \"lead\"\n    );\n    if (leadCost) {\n      cpl = toNumber(leadCost.value);\n    }\n  }\n\n  // If CPL missing but leads exist → calculate\n  if (!cpl && leads > 0) {\n    cpl = toNumber(d.spend) / leads;\n  }\n\n  return {\n    json: {\n      date: d.date_start || \"\",\n      level: d._level || \"\",\n\n      campaign_id: d.campaign_id || \"\",\n      campaign_name: d.campaign_name || \"\",\n\n      adset_id: d.adset_id || \"\",\n      adset_name: d.adset_name || \"\",\n\n      ad_id: d.ad_id || \"\",\n      ad_name: d.ad_name || \"\",\n\n      spend: toNumber(d.spend),\n      impressions: toNumber(d.impressions),\n      cpm: toNumber(d.cpm),\n      ctr: toNumber(d.ctr),\n      cpc: toNumber(d.cpc),\n      frequency: toNumber(d.frequency),\n\n      leads,\n      cpl\n    }\n  };\n});"
+      },
+      "id": "8d16f423-e222-49c4-95e1-076c56a1b208",
+      "name": "Code: Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1bjhH_m4v8Rfd7HfRGWBPdyWefXadP71fhq_VdHjDbj0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1bjhH_m4v8Rfd7HfRGWBPdyWefXadP71fhq_VdHjDbj0/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "id": "91d5aac2-f1ce-4997-bd46-5c13952b61da",
+      "name": "GSheets: Read Baseline",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2160,
+        992
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "virhTEhmVs7kdPOT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 12 — Rolling 3-Day Avg + Inject Baseline\nconst sheetsItems  = $(\"GSheets: Read Baseline\").all();\nconst currentItems = $(\"Code: Normalize\").all();\nconst yesterday    = currentItems[0]?.json?.date || \"\";\n\nconst yDate  = new Date(yesterday);\nconst cutoff = new Date(yDate);\ncutoff.setDate(cutoff.getDate() - 3);\nconst cutoffStr = cutoff.toISOString().split(\"T\")[0];\n\nconst rollingRows = sheetsItems.filter(item => {\n  const r = item.json;\n  const d = r[\"Date\"] || r[\"date\"] || \"\";\n  const l = r[\"Level\"] || r[\"level\"] || \"\";\n  return l === \"Campaign\" && d >= cutoffStr && d < yesterday;\n});\n\nconst mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;\nlet avg_ctr = 0, avg_cpl = 0;\n\nif (rollingRows.length > 0) {\n  avg_ctr = mean(rollingRows.map(r => parseFloat(r.json[\"CTR\"] || 0)).filter(v => v > 0));\n  avg_cpl = mean(rollingRows.map(r => parseFloat(r.json[\"CPL\"] || 0)).filter(v => v > 0));\n}\n\n// Fallback: use today's data if no sheet history exists (first run)\nif (!avg_ctr || !avg_cpl) {\n  const camps = currentItems.filter(i => i.json.level === \"Campaign\");\n  if (!avg_ctr) avg_ctr = mean(camps.map(i => i.json.ctr).filter(v => v > 0));\n  if (!avg_cpl) avg_cpl = mean(camps.map(i => i.json.cpl).filter(v => v > 0));\n}\n\nconst r2 = v => Math.round(v * 100) / 100;\nreturn currentItems.map(item => ({\n  json: { ...item.json, account_avg_ctr: r2(avg_ctr), account_avg_cpl: r2(avg_cpl) }\n}));"
+      },
+      "id": "c3b43cc1-2d33-4d79-9313-696fbb92e56d",
+      "name": "Code: Rolling Baseline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2608,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 13 — Build Claude Payload\nconst items    = $input.all();\nconst campaigns = items.filter(i => i.json.level === \"Campaign\");\nconst adsets    = items.filter(i => i.json.level === \"Adset\");\nconst ads       = items.filter(i => i.json.level === \"Ad\");\n\nconst payload = {\n  date: items[0]?.json?.date || \"\",\n  account_avg_ctr: items[0]?.json?.account_avg_ctr || 0,\n  account_avg_cpl: items[0]?.json?.account_avg_cpl || 0,\n  baseline_type: \"rolling_3_day_average\",\n  campaigns: campaigns.map(c => {\n    const camp = c.json;\n    const campAdsets = adsets.filter(a => a.json.campaign_name === camp.campaign_name);\n    return {\n      campaign_name: camp.campaign_name,\n      spend: camp.spend, impressions: camp.impressions, cpm: camp.cpm,\n      ctr: camp.ctr, cpc: camp.cpc, frequency: camp.frequency,\n      leads: camp.leads, cpl: camp.cpl,\n      flag_no_leads: camp.flag_no_leads,\n      flag_high_spend_no_leads: camp.flag_high_spend_no_leads,\n      adsets: campAdsets.map(a => {\n        const as = a.json;\n        const asAds = ads.filter(ad =>\n          ad.json.adset_name === as.adset_name &&\n          ad.json.campaign_name === as.campaign_name);\n        return {\n          adset_name: as.adset_name, spend: as.spend, ctr: as.ctr,\n          cpc: as.cpc, frequency: as.frequency, leads: as.leads, cpl: as.cpl,\n          ads: asAds.map(ad => ({\n            ad_name: ad.json.ad_name, spend: ad.json.spend,\n            ctr: ad.json.ctr, cpc: ad.json.cpc, frequency: ad.json.frequency,\n            leads: ad.json.leads, cpl: ad.json.cpl\n          }))\n        };\n      })\n    };\n  })\n};\n\nreturn [{ json: { payload: JSON.stringify(payload) } }];"
+      },
+      "id": "6b4d794a-0a70-4e00-aafe-3aef43ced30a",
+      "name": "Code: Build Claude Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE — Parse Claude AI Agent Output (LangChain Version)\n\nconst response = $input.first().json;\n\n// Claude AI Agent (LangChain) returns:\nconst raw = response?.output || \"\";\n\nif (!raw || typeof raw !== \"string\") {\n  throw new Error(\"CLAUDE_PARSE_FAIL: No output field from Claude Agent\");\n}\n\n// Try to parse as pure JSON first\ntry {\n  return [{ json: JSON.parse(raw) }];\n} catch (e) {\n  // If not pure JSON, try extracting first { ... } block\n  const firstBrace = raw.indexOf(\"{\");\n  const lastBrace = raw.lastIndexOf(\"}\");\n\n  if (firstBrace !== -1 && lastBrace !== -1) {\n    const jsonString = raw.slice(firstBrace, lastBrace + 1);\n    try {\n      return [{ json: JSON.parse(jsonString) }];\n    } catch (err) {\n      throw new Error(\n        \"CLAUDE_PARSE_FAIL: Could not parse JSON from output | Extracted: \" +\n          jsonString.slice(0, 300)\n      );\n    }\n  }\n\n  throw new Error(\n    \"CLAUDE_PARSE_FAIL: No valid JSON found | Raw: \" +\n      raw.slice(0, 300)\n  );\n}"
+      },
+      "id": "4539edb8-af72-44b0-a025-2cc524bca311",
+      "name": "Code: Parse Claude",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3408,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NODE 16 — Merge Raw Data + AI Analysis\nconst claude  = $(\"Code: Parse Claude\").first().json;\nconst dataAll = $(\"Code: Rolling Baseline\").all();\n\nconst campMap  = {};\nconst adsetMap = {};\nconst adMap    = {};\n\n(claude.campaign_analysis || []).forEach(c => { campMap[c.campaign_name] = c; });\n(claude.adset_analysis || []).forEach(a => {\n  adsetMap[a.campaign_name + \"|\" + a.adset_name] = a;\n});\n(claude.ad_analysis || []).forEach(a => {\n  adMap[a.campaign_name + \"|\" + a.adset_name + \"|\" + a.ad_name] = a;\n});\n\nreturn dataAll.map(item => {\n  const d = item.json;\n  let info = {};\n  if (d.level === \"Campaign\")\n    info = campMap[d.campaign_name] || {};\n  else if (d.level === \"Adset\")\n    info = adsetMap[d.campaign_name + \"|\" + d.adset_name] || {};\n  else if (d.level === \"Ad\")\n    info = adMap[d.campaign_name + \"|\" + d.adset_name + \"|\" + d.ad_name] || {};\n  return { json: { ...d,\n    health_score:   info.health_score || \"\",\n    risk_flags:     Array.isArray(info.risk_flags) ? info.risk_flags.join(\", \") : \"\",\n    recommendation: info.recommendation || \"\",\n    urgency:        info.urgency || \"\"\n  }};\n});"
+      },
+      "id": "cc213be1-d698-4752-a38a-4f7cb875bf53",
+      "name": "Code: Merge Data + AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3632,
+        912
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "8f6dc2f2-adbf-49cd-ade6-0e9bbd388d60",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        368,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ERROR NODE — Format Error Alert\nconst err = $execution.lastNodeExecuted || \"Unknown Node\";\nconst msg = $execution.error?.message || \"Unknown error\";\nconst ts  = new Date().toISOString();\n\nreturn [{\n  json: {\n    timestamp: ts,\n    failed_node: err,\n    error_message: msg,\n    wa_alert: \"*⚠️ N8N WORKFLOW ERROR*\\n📍 Node: \" + err + \"\\n❌ \" + msg + \"\\n🕐 \" + ts\n  }\n}];"
+      },
+      "id": "7fa6b64c-645b-4a18-a971-4723ef5b1057",
+      "name": "Code: Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$env[\"GOOGLE_SHEET_ID\"]}}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Error_Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{$json.timestamp}}",
+            "Failed Node": "={{$json.failed_node}}",
+            "Error Message": "={{$json.error_message}}"
+          },
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Failed Node",
+              "displayName": "Failed Node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error Message",
+              "displayName": "Error Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb776c5b-55d1-44ee-aecf-a7e2e1546b6f",
+      "name": "GSheets: Log Error",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        816,
+        1328
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hQvYhbQELefvqiMg",
+          "name": "preeti_googlesheet"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2384,
+        912
+      ],
+      "id": "575ed1c9-488a-4a08-88f8-364ec484aa94",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.payload }}",
+        "options": {
+          "systemMessage": "You are a senior Meta Ads Growth Strategist with 10+ years of performance marketing experience managing large lead-generation budgets.\n\nYour role is to analyze Meta Ads performance data and provide structured, actionable optimization recommendations focused on lead quality and scalable growth.\n\nYou must behave as a strategic growth advisor, not a generic assistant.\n\nPRIMARY OBJECTIVE\n\nMaximize high-quality leads while improving cost efficiency and enabling sustainable scaling.\n\nLead quality is prioritized over volume.\n\nANALYSIS FRAMEWORK\n\nEvaluate performance at four levels:\n\nAccount Level\n\nCompare against rolling baseline\n\nCompare against account averages\n\nIdentify overall trend (scaling, stable, declining, critical)\n\nCampaign Level\n\nFlag spend > 500 with zero leads as critical\n\nIdentify creative weakness if CTR < 0.8%\n\nIdentify fatigue if frequency > 3\n\nFlag CPL 25% above baseline\n\nAdset Level\n\nDetect budget waste clusters\n\nIdentify scale-ready segments\n\nCompare performance within campaign\n\nFunnel Diagnosis\n\nHigh CTR + zero leads → funnel issue\n\nLow CTR + low leads → creative issue\n\nHigh CTR + high CPC → bidding/competition issue\n\nDECISION RULES\n\nApply these strict rules:\n\nSpend > 500 AND Leads = 0 → CRITICAL\n\nCTR < 0.8% → Creative issue\n\nFrequency > 3 → Fatigue risk\n\nCPL > baseline by 25% → Efficiency decline\n\nOnly recommend scaling if CPL < baseline\n\nNever recommend scaling unprofitable campaigns\n\nOUTPUT REQUIREMENTS (VERY IMPORTANT)\n\nYou MUST return ONLY valid JSON.\n\nDo NOT include:\n\nMarkdown\n\nCode blocks\n\nBackticks\n\nSection headers\n\nCommentary outside JSON\n\nExplanatory text before or after JSON\n\nReturn a single valid JSON object only.\n\nNo surrounding text.\n\nREQUIRED JSON STRUCTURE\n\nReturn exactly this structure:\n\n{\n\"executive_summary\": \"\",\n\"account_health_score\": 0,\n\"account_status\": \"stable | scaling | declining | critical\",\n\"critical_issues\": [],\n\"scale_candidates\": [],\n\"budget_reallocation_plan\": [\n{\n\"from_campaign\": \"\",\n\"to_campaign\": \"\",\n\"recommended_shift_amount\": \"\",\n\"reason\": \"\"\n}\n],\n\"campaign_analysis\": [\n{\n\"campaign_name\": \"\",\n\"status\": \"scale | monitor | optimize | pause\",\n\"health_score\": 0,\n\"primary_issue\": \"\",\n\"recommended_budget_action\": \"\",\n\"creative_recommendation\": \"\",\n\"targeting_recommendation\": \"\"\n}\n],\n\"creative_insights\": [],\n\"funnel_diagnosis\": \"\",\n\"strategic_next_steps\": []\n}\n\nSCORING SCALE\n\nHealth Score:\n\n80–100 → Scalable\n60–79 → Stable\n40–59 → Underperforming\n0–39 → Critical\n\nEXECUTIVE SUMMARY RULES\n\nThe \"executive_summary\" field must:\n\nBe under 250 words\n\nBe concise\n\nBe strategic\n\nContain immediate actions\n\nContain scale insight\n\nContain risk warning if applicable\n\nIt must remain plain text inside JSON.\n\nFINAL RULE\n\nReturn only the JSON object.\n\nIf data is missing, make reasonable assumptions and continue.\n\nDo not explain your reasoning process.\n\nDo not wrap the output in code blocks.\n\nDo not add markdown formatting.\n\nOnly return valid JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        3056,
+        912
+      ],
+      "id": "5a53c1d5-73a2-4564-831f-15e796f22692",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3136,
+        1136
+      ],
+      "id": "bed64545-3036-44b5-bb57-4fda7997f828",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "Mx7BFJ79Dwwv92CQ",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "bcd3a156-5e44-41cf-aa87-2f8baea0e355",
+      "name": "Merge: Combine All1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1488,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collapse all items into one to prevent multiple GSheet reads\n\nconst allItems = $input.all();\n\nreturn [{\n  json: {\n    normalized_data: allItems.map(i => i.json)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        992
+      ],
+      "id": "7a0d6199-6834-4d76-845f-c54bec383914",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1bjhH_m4v8Rfd7HfRGWBPdyWefXadP71fhq_VdHjDbj0",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Daily_Meta_Performance",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bjhH_m4v8Rfd7HfRGWBPdyWefXadP71fhq_VdHjDbj0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "level",
+              "displayName": "level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "campaign_id",
+              "displayName": "campaign_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "campaign_name",
+              "displayName": "campaign_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "adset_id",
+              "displayName": "adset_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "adset_name",
+              "displayName": "adset_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_id",
+              "displayName": "ad_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ad_name",
+              "displayName": "ad_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "spend",
+              "displayName": "spend",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "impressions",
+              "displayName": "impressions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cpm",
+              "displayName": "cpm",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ctr",
+              "displayName": "ctr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cpc",
+              "displayName": "cpc",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "frequency",
+              "displayName": "frequency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leads",
+              "displayName": "leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cpl",
+              "displayName": "cpl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "flag_no_leads",
+              "displayName": "flag_no_leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "flag_high_spend_no_leads",
+              "displayName": "flag_high_spend_no_leads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "account_avg_ctr",
+              "displayName": "account_avg_ctr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "account_avg_cpl",
+              "displayName": "account_avg_cpl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "health_score",
+              "displayName": "health_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommendation",
+              "displayName": "recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ddcb6f5f-ddb8-4e43-be2e-cbd255db4a1b",
+      "name": "GSheets: Append Rows1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3856,
+        912
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "virhTEhmVs7kdPOT",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule: Daily 8AM IST": {
+      "main": [
+        [
+          {
+            "node": "Code: Set Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Set Dates": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Campaign Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Adset Insights",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Ad Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Campaign Insights": {
+      "main": [
+        [
+          {
+            "node": "Code: Tag Campaign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Adset Insights": {
+      "main": [
+        [
+          {
+            "node": "Code: Tag Adset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Ad Insights": {
+      "main": [
+        [
+          {
+            "node": "Code: Tag Ad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Tag Campaign": {
+      "main": [
+        [
+          {
+            "node": "Merge: Combine All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Tag Adset": {
+      "main": [
+        [
+          {
+            "node": "Merge: Combine All",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge: Combine All": {
+      "main": [
+        [
+          {
+            "node": "Merge: Combine All1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Normalize": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Rolling Baseline": {
+      "main": [
+        [
+          {
+            "node": "Code: Build Claude Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Build Claude Payload": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parse Claude": {
+      "main": [
+        [
+          {
+            "node": "Code: Merge Data + AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Merge Data + AI": {
+      "main": [
+        [
+          {
+            "node": "GSheets: Append Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Format Error": {
+      "main": [
+        [
+          {
+            "node": "GSheets: Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSheets: Read Baseline": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code: Rolling Baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code: Parse Claude",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Tag Ad": {
+      "main": [
+        [
+          {
+            "node": "Merge: Combine All1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge: Combine All1": {
+      "main": [
+        [
+          {
+            "node": "Code: Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "GSheets: Read Baseline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "75dca3c1-0423-487d-8c66-a3a818c94d06",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9cb0b0a8160ad4848a0344a0173b1bbee8b887444360ac33f82ff04531a903c0"
+  },
+  "id": "IpC2lSmFciUxcQzw",
+  "tags": []
+}

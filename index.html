@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vyom — n8n Automation Template Library | 280+ Free Workflows</title>
+  <meta name="description" content="Vyom is a free library of 280+ ready-to-use n8n automation templates. Browse and download workflows for Gmail, Telegram, Slack, Discord, WhatsApp, OpenAI, and more." />
+  <meta name="keywords" content="n8n templates, automation workflows, n8n JSON, free automation, AI automation, Gmail automation, Telegram bot, n8n library" />
+  <meta property="og:title" content="Vyom — n8n Automation Template Library" />
+  <meta property="og:description" content="280+ free, ready-to-import n8n automation templates. Download JSON workflows for any use case." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#FFD000" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23FFD000'/><text x='16' y='23' text-anchor='middle' font-size='18' font-weight='900' font-family='Arial' fill='%230A0A0A'>V</text></svg>">
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════════════════════ -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">V</div>
+      <div class="nav-logo-text">VY<span>OM</span></div>
+    </div>
+
+    <p class="nav-tagline">n8n Template Library</p>
+
+    <div class="nav-search">
+      <span class="nav-search-icon">🔍</span>
+      <input
+        type="search"
+        id="searchInput"
+        placeholder="Search templates, tools, use cases..."
+        aria-label="Search templates"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="nav-stats">
+      <div class="nav-stat">
+        <div class="nav-stat-value">280+</div>
+        <div class="nav-stat-label">Templates</div>
+      </div>
+      <div class="nav-stat">
+        <div class="nav-stat-value">18</div>
+        <div class="nav-stat-label">Categories</div>
+      </div>
+      <div class="nav-stat">
+        <div class="nav-stat-value">Free</div>
+        <div class="nav-stat-label">Forever</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ════════════════════════════════════════════════ -->
+  <section class="hero" aria-label="Hero section">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Free to Download · Ready to Import · No Login Required
+    </div>
+
+    <h1 class="hero-title">
+      Automate Everything<br />
+      with <span class="accent">Vyom</span>
+    </h1>
+
+    <p class="hero-description">
+      The largest collection of n8n workflow templates — all free.
+      Browse, filter, and download ready-to-use JSON automations for
+      Gmail, Telegram, AI agents, WhatsApp, Slack, and 400+ more tools.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-primary" id="scrollToTemplates" aria-label="Browse templates">
+        ⚡ Browse Templates
+      </button>
+      <button class="btn-secondary" id="howToBtn" aria-label="How to use">
+        📖 How to Use
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="280" data-suffix="+">280+</div>
+        <div class="hero-stat-label">Templates</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="18">18</div>
+        <div class="hero-stat-label">Categories</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="400" data-suffix="+">400+</div>
+        <div class="hero-stat-label">Integrations</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="14">14</div>
+        <div class="hero-stat-label">Languages</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FILTERS ═════════════════════════════════════════════ -->
+  <div class="filters-section" id="filtersSection" role="complementary" aria-label="Filter templates">
+    <div class="filters-inner">
+      <!-- Category Filter -->
+      <div class="filters-row" role="group" aria-label="Filter by category">
+        <span class="filter-label">Category</span>
+        <div id="categoryFilters" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;"></div>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="filters-row" role="group" aria-label="Filter by department">
+        <span class="filter-label">For</span>
+        <div id="deptFilters" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESULTS BAR ══════════════════════════════════════════ -->
+  <div class="results-bar" role="status" aria-live="polite">
+    <p class="results-count" id="templateCount">Loading templates...</p>
+  </div>
+
+  <!-- ══ TEMPLATE GRID ════════════════════════════════════════ -->
+  <main class="templates-section" aria-label="Template library">
+    <div class="templates-grid" id="templateGrid" role="list">
+      <!-- Cards injected by app.js -->
+    </div>
+  </main>
+
+  <!-- ══ HOW TO USE ════════════════════════════════════════════ -->
+  <section class="how-section" aria-label="How to use">
+    <h2 class="how-title">How to Use These Templates</h2>
+    <p class="how-subtitle">Get automating in under 2 minutes</p>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div class="how-step-title">Find a Template</div>
+        <div class="how-step-desc">Browse or search 280+ workflows by category, department, or tool name.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div class="how-step-title">Download JSON</div>
+        <div class="how-step-desc">Click the download button to get the ready-to-import n8n JSON file.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div class="how-step-title">Import to n8n</div>
+        <div class="how-step-desc">Go to Workflows → Import from File in your n8n instance and select the JSON.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <div class="how-step-title">Configure & Go</div>
+        <div class="how-step-desc">Add your credentials for each connected service, activate and automate!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════════ -->
+  <footer role="contentinfo">
+    <div class="footer-brand">
+      <div class="nav-logo-mark">V</div>
+      <span>VY<span class="mark">OM</span></span>
+    </div>
+    <p class="footer-credit">
+      280+ free n8n automation templates · All rights to original authors.
+    </p>
+    <div class="footer-links">
+      <a class="footer-link" href="https://n8n.io" target="_blank" rel="noopener">n8n.io</a>
+    </div>
+  </footer>
+
+  <!-- ══ MODAL ══════════════════════════════════════════════════ -->
+  <div
+    class="modal-overlay"
+    id="modalOverlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Template details"
+  >
+    <div class="modal" id="modalBody">
+      <!-- Injected by app.js -->
+    </div>
+  </div>
+
+  <!-- ══ TOAST ══════════════════════════════════════════════════ -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- ══ SCRIPTS ════════════════════════════════════════════════ -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

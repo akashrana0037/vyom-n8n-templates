@@ -1,0 +1,397 @@
+{
+  "name": "brands2be_email_automation",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8,
+              "minute": 55
+            }
+          ]
+        }
+      },
+      "id": "0df071b1-43f2-4eb1-8c74-98e4749c69a3",
+      "name": "Cron 9AM",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1872,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14wyALWQVRZoVlXD1J4snuFR6KcuT2R5YzabdEqZIWLk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1275628903,
+          "mode": "list",
+          "cachedResultName": "result-BRC Email - Sheet1.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14wyALWQVRZoVlXD1J4snuFR6KcuT2R5YzabdEqZIWLk/edit#gid=1275628903"
+        },
+        "options": {}
+      },
+      "id": "120ecbee-6dda-4372-9702-6c9b79ca4c8e",
+      "name": "Read Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -1648,
+        -128
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bW36WCkLky7DhHWt",
+          "name": "BRC Email_Cleaned"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.filter(i => {\n  const email = (i.json.Email || '').toString().trim();\n  const action = (i.json.action || '').toString().trim().toLowerCase();\n  return email && action !== 'sent';\n});"
+      },
+      "id": "d95e3a48-cc1f-41ff-bf57-64b6bdfe74dc",
+      "name": "Filter Pending",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Randomize rows and limit to 300 unique emails\nconst LIMIT = 300;\nlet arr = items.map(x => ({ json: x.json }));\n\n// Shuffle\nfor (let i = arr.length - 1; i > 0; i--) {\n  const j = Math.floor(Math.random() * (i + 1));\n  [arr[i], arr[j]] = [arr[j], arr[i]];\n}\n\n// Today's date in IST (DATE ONLY, no time)\nconst todayIST = new Date().toLocaleString(\"en-CA\", {\n  timeZone: \"Asia/Kolkata\",\n  year: \"numeric\",\n  month: \"2-digit\",\n  day: \"2-digit\"\n}); \n// en-CA gives ISO YYYY-MM-DD\n\n// Unique & limit\nconst seen = new Set();\nconst out = [];\n\nfor (const it of arr) {\n  const email = (it.json.Email || '').toLowerCase().trim();\n  if (!email) continue;\n\n  if (!seen.has(email)) {\n    seen.add(email);\n\n    // Add only date (IST)\n    it.json.today_date = todayIST;\n\n    out.push(it);\n\n    if (out.length >= LIMIT) break;\n  }\n}\n\nreturn out;\n\n"
+      },
+      "id": "b80dad91-ebe8-43b6-85c7-a04675c33023",
+      "name": "Randomize & Limit 300",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5190ce7c-a630-4cf1-816c-c26f7e77e7b9",
+      "name": "Split In Batches (5)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "=75% Reduction in CAC Isn’t Luck, It’s Math & Empathy",
+        "includeHtml": true,
+        "htmlMessage": "=<!DOCTYPE html> <html lang=\"en\"> <head>     <meta charset=\"UTF-8\">     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">     <title>Brands2be - Agency Pitch</title>     <style>         * {             color: #000000 !important;         }         a {             text-decoration: none !important;             color: #000000 !important;             display: block;             cursor: pointer;         }         a:link {             color: #000000 !important;         }         a:visited {             color: #000000 !important;         }         a:hover {             color: #000000 !important;         }         a:active {             color: #000000 !important;         }         p {             color: #000000 !important;         }     </style> </head> <body>     <a href=\"https://www.brands2be.com/best-performance-marketing-agency-in-kolkata\" target=\"_blank\">         <p>Hi {{ $json['First Name'] }} ,</p>                  <p>Most agencies chase metrics. We chase <strong>meaning</strong>.</p>                  <p>When you <strong>understand people</strong> before you target them, the math naturally follows.</p>                  <p>At <strong>Brands2be</strong>, we have helped businesses cut <strong>Customer Acquisition Costs (CAC)</strong> by up to <strong>75%</strong>. We achieve this not by spending more, but by <strong>decoding patterns, emotions, and intent</strong> to build ad systems that genuinely connect with customers.</p>                  <p>We blend <strong>deep data</strong> with <strong>human psychology</strong> to build ad systems that don't just sell, they <strong>connect</strong>.</p>                  <p>If this approach aligns with your vision, I would be happy to share a brief <strong>case study</strong> on how we achieved these results.</p>                  <p>Warm regards,</p>                  <p><strong>Mudit Tatia</strong><br>         Director of Marketing<br>         <strong>Brands2be</strong></p>     </a> </body> </html>",
+        "message": "=Hi   ,\n\nMost agencies chase metrics. We chase meaning.\n\nWhen you understand people before you target them, the math naturally follows.\n\nAt Brands2be, we have helped businesses cut Customer Acquisition Costs (CAC) by up to 75%. We achieve this not by spending more, but by decoding patterns, emotions, and intent to build ad systems that genuinely connect with customers.\n\nWe blend deep data with human psychology to build ad systems that don't just sell, they connect.\n\nIf this approach aligns with your vision, I would be happy to share a brief case study on how we achieved these results.\n\nWarm regards,\n\nMudit Tatia\nDirector of Marketing\nBrands2be",
+        "toList": [
+          "={{ $json.Email }}"
+        ],
+        "additionalFields": {}
+      },
+      "id": "98731cd5-a13f-484c-8c18-481e72c547bf",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        -192
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8hIBAy0OrVJdARLr",
+          "name": "mudit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Check IST time and stop if hour >= 20 (8 PM)\n// Returns original items to continue, or empty array to stop\nconst istString = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });\nconst ist = new Date(istString);\nconst hour = ist.getHours();\n// if hour is 20 or more, stop\nif (hour >= 20) {\n  // return empty -> stops the loop\n  return [];\n}\n// otherwise continue\nreturn items;"
+      },
+      "id": "b13d171d-8f8d-4e07-81b8-31ac7e36e6b8",
+      "name": "Check Time 8PM (IST)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14wyALWQVRZoVlXD1J4snuFR6KcuT2R5YzabdEqZIWLk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1275628903,
+          "mode": "list",
+          "cachedResultName": "result-BRC Email - Sheet1.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14wyALWQVRZoVlXD1J4snuFR6KcuT2R5YzabdEqZIWLk/edit#gid=1275628903"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.Email }}",
+            "First Name": "={{ $json['First Name'] }}",
+            "date": "={{ $json.today_date }}",
+            "action": "sent"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "59e95edd-40f7-4780-a467-e415567c8d62",
+      "name": "Mark as Sent1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -528,
+        -192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bW36WCkLky7DhHWt",
+          "name": "BRC Email_Cleaned"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nfor (const item of items) {\n  if (item.json[\"First Name\"] && typeof item.json[\"First Name\"] === \"string\") {\n    item.json[\"First Name\"] = item.json[\"First Name\"]\n      .toLowerCase()\n      .trim()\n      .split(/\\s+/)\n      .map(word => word.charAt(0).toUpperCase() + word.slice(1))\n      .join(\" \");\n  }\n}\n\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        -128
+      ],
+      "id": "cde3bd55-3b02-4b8a-8a5e-51e378af6a64",
+      "name": "name_conversion"
+    },
+    {
+      "parameters": {},
+      "id": "55bcc36a-cf20-4688-afa8-c22db0f4f925",
+      "name": "Wait 1 hours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -192
+      ],
+      "webhookId": "356f591a-1239-4d55-8b2d-39e982045d9d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron 9AM": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Pending": {
+      "main": [
+        [
+          {
+            "node": "Randomize & Limit 300",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Randomize & Limit 300": {
+      "main": [
+        [
+          {
+            "node": "name_conversion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches (5)": {
+      "main": [
+        [
+          {
+            "node": "Mark as Sent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Time 8PM (IST)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches (5)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Sent1": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "name_conversion": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches (5)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 hours": {
+      "main": [
+        [
+          {
+            "node": "Check Time 8PM (IST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed"
+  },
+  "versionId": "425bfd36-6038-46c4-8b2c-8479135406e3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9cb0b0a8160ad4848a0344a0173b1bbee8b887444360ac33f82ff04531a903c0"
+  },
+  "id": "Vz7npNxyD2WQdoxg",
+  "tags": []
+}

@@ -1,0 +1,186 @@
+{
+  "name": "voice agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.searchquery }}",
+        "options": {
+          "systemMessage": "You are Riya, an intelligent, friendly, and professional AI support agent.\n\nYour primary responsibility is to answer customer questions by retrieving accurate information from a Pinecone vector database that contains the company’s knowledge base (website content, FAQs, policies, and internal documents).\n\nCore Responsibilities\n\nUnderstand the user’s query clearly.\n\nRetrieve the most relevant context from the Pinecone vector database.\n\nUse the retrieved context to generate accurate, concise, and helpful answers.\n\nRespond in a clear, polite, and conversational tone suitable for customer support.\n\nRetrieval Rules\n\nAlways retrieve information from the Pinecone vector database before answering.\n\nUse only the information provided in the retrieved context.\n\nDo not guess, assume, or fabricate information.\n\nIf the retrieved context does not contain a clear answer:\n\nPolitely state that the information is unavailable\n\nOffer to escalate to a human agent\n\nAnswering Guidelines\n\nKeep responses short, clear, and easy to understand.\n\nAvoid technical jargon unless explicitly required.\n\nDo not mention Pinecone, embeddings, vectors, or internal systems to the user.\n\nDo not expose raw retrieved data or internal metadata.\n\nSpeak confidently but remain helpful and empathetic.\n\nSafety & Privacy\n\nDo not share sensitive or private customer information.\n\nDo not provide legal, medical, or financial advice.\n\nFollow ethical, non-discriminatory behavior at all times.\n\nConversation Behavior\n\nIntroduce yourself as Riya when appropriate.\n\nStay focused on the user’s question.\n\nAsk a polite clarification only if the query is unclear.\n\nConfirm understanding before closing the conversation.\n\nFallback & Escalation\n\nIf you cannot confidently answer a question using the retrieved data:\n\nClearly say you don’t have enough information\n\nOffer to connect the user to a human support representative\n\nPrimary Objective\n\nProvide accurate, context-based answers using Pinecone retrieval, ensuring a smooth and satisfying customer experience."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -288,
+        -160
+      ],
+      "id": "fcb2361d-d97c-4ce4-bdbe-761a39b62965",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "={{ $json.body.searchquery }}",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag",
+          "mode": "list",
+          "cachedResultName": "rag"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "3f22b499-5347-42ae-8c3d-28919d16ed9f",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "xH2GOKILfs02zmMn",
+          "name": "rag_niht"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        272
+      ],
+      "id": "26867e4c-681a-444e-a1c0-0eaaf4854887",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PfPuILuNAhgbl2FC",
+          "name": "rana Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        64
+      ],
+      "id": "946797e1-80c7-460c-93d6-fb2272fc57d9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "PfPuILuNAhgbl2FC",
+          "name": "rana Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        -160
+      ],
+      "id": "a4b7eeb3-3abb-4865-9670-acda048aabef",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "information",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -544,
+        -160
+      ],
+      "id": "f502adee-f16f-48f8-bbb4-19ce70c10909",
+      "name": "Webhook",
+      "webhookId": "9cbda5d9-076e-4d9e-86b5-138654254c4b"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "e8301798-d7cd-4b2b-833d-d9785bf412eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9cb0b0a8160ad4848a0344a0173b1bbee8b887444360ac33f82ff04531a903c0"
+  },
+  "id": "PBnr1yYhNSoY9jeG",
+  "tags": []
+}
